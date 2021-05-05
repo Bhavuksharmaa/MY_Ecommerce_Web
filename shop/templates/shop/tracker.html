@@ -1,0 +1,110 @@
+{% extends 'shop/basic.html'%}
+{% block title %} Tracker{% endblock %}
+{% block body %}
+
+<div class="container" xmlns="http://www.w3.org/1999/html">
+    <div class="col my-4">
+        <h2>Enter Your Order Id and Email</h2>
+        <form action="#" id="trackerForm">{% csrf_token %}
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="OrderID">Order Id</label>
+                    <input type="text" class="form-control" id="OrderID" name="orderId" placeholder="Order Id">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="inputEmail4">Email</label>
+                    <input type="email" class="form-control" id="inputEmail4" name="email" placeholder="Email">
+                </div>
+            </div>
+            <button class="btn btn-primary" type="submit">Check Update</button>
+        </form>
+    <div class="col my-4">
+        <h2 > <span id="h2update"></span>  </h2>
+        <ul class="list-group" id="list">
+
+        </ul>
+    </div>
+
+        <div class="col my-4">
+        <h2 ><span id="h2items" ></span></h2>
+        <ul class="list-group">
+            <span id = 'orderitems' >
+
+                </span>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{%block js %}
+$('#trackerForm').submit(function(event){
+
+      $('#list').empty();
+      $('#orderitems').empty();
+      $('#h2items').empty();
+      $('#h2update').empty();
+      var formData = {
+      'orderId' : $('input[name = orderId]').val(),
+      'email' : $('input[name = email]').val(),
+      'csrfmiddlewaretoken' : $('input[name = csrfmiddlewaretoken]').val()
+      };
+
+      $.ajax({
+              type:'POST',
+              url: '/shop/tracker/',
+              data : formData,
+              encode: true
+             })
+
+      .done(function(data){
+            data = JSON.parse(data);
+            updates = data[0];
+   if(data.length > 0 & data != {}){
+      string = '';
+      for(var item in updates){
+         string += `<li class="list-group-item d-flex justify-content-between align-items-center" >
+                 ${updates[item]['text']}
+    <span class="badge bg-primary rounded-pill">${updates[item]['time']}</span>
+            </li>`
+       document.getElementById('list').innerHTML = string;
+       document.getElementById('h2update').innerHTML = 'Your Order Update Is' ;
+       }
+
+   cart = JSON.parse(data[1])
+    var total_price =0;
+    var items = "";
+    for(var item in cart){
+         total_price = total_price + (cart[item][2] * cart[item][0]);
+         items += `<li class="list-group-item d-flex justify-content-between align-items-center" id=${cart[item][1]}>
+    ${cart[item][1]}
+
+     <span class="badge bg-primary rounded-pill "style="background-color:#e6eff3!important;font-size:inherit;"><span style="margin-right: 125px;">(Price : ${cart[item][2]} Rs/Item) </span>${cart[item][0]}</span>
+            </li>`
+       }
+
+    items += `<li class="list-group-item d-flex justify-content-between align-items-center" id="totalprize">
+
+    <span class="badge bg-primary rounded-pill" style="background-color:#e6eff3!important;font-size: larger;margin-left: 829px;">Total Price : ${total_price} Rs</span>
+            </li>`
+
+    $('#orderitems').append(items);
+    document.getElementById('h2items').innerHTML = 'Your Ordered Items Are' ;
+}
+else{
+   string = '';
+string = `<li class="list-group-item d-flex justify-content-between align-items-center" >
+                 Sorry Your Id or Email is wrong!
+            </li>`
+   document.getElementById('list').innerHTML = string;
+       }
+
+});
+
+
+
+
+
+event.preventDefault();
+
+});
+{% endblock %}

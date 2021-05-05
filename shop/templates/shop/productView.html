@@ -1,0 +1,91 @@
+{% extends 'shop/basic.html'%}
+{% block title %} {{product.product_name}} MY Shooping Web! {% endblock %}
+{% block body %}
+<div class="container my-3" >
+<div class="row">
+    <div class="col-md-4">
+        <img src="/media/{{product.image}}" style="width:300px;height:400px;">
+         <div class="d-grid gap-2 d-md-block" style="margin-top:30px;margin-left:45px;">
+             <span id="tarpro{{product.id}}" class="target">
+              <button class="btn btn-primary addcart mx-1 " id="pro{{product.id}}" type="button">Add To Cart</button>
+             </span>
+             <a href="/shop/checkout"  class="btn btn-primary cart " >Checkout Cart</a>
+</div>
+        </div>
+    <div class="col-md-8">
+        <h3 style="margin-top:40px " id="name">{{product.product_name}}</h3>
+            <h6 style="font-style:italic;color:blue;" >Price : <span id="price">{{product.price}}</span> Rs.</h6>
+            <p style="margin-top: 49px;">{{product.Desc}}</p>
+
+    </div>
+
+</div>
+
+</div>
+
+
+{% endblock %}
+
+{% block js %}
+if(localStorage.getItem('cart')==null){
+    var cart = {};
+    }
+    else{
+    cart = JSON.parse(localStorage.getItem('cart'));
+    }
+
+$('.addcart').click(function(){
+var idstr = this.id.toString();
+
+if(cart[idstr] != undefined){
+updatecart(idstr);
+}
+else
+{
+var name = document.getElementById('name').innerHTML;
+var qty = 1;
+var price = document.getElementById('price').innerHTML;
+cart[idstr] =[qty,name,price];
+updatecart(idstr);
+localStorage.setItem('cart',JSON.stringify(cart));
+}
+});
+
+function updatecart(item){
+         document.getElementById('tar' + item).innerHTML = "<button id='minus" + item + "' class='btn btn-primary minus'>-</button> <span id='val" + item + "''>" + cart[item][0] + "</span> <button id='plus" + item + "' class='btn btn-primary plus'> + </button>";
+
+}
+
+$('.target').on("click","button.minus",function(){
+a = this.id.slice(5,);
+cart[a][0]=cart[a][0]-1;
+cart[a][0] = Math.max(0, cart[a][0]);
+if(cart[a][0]==0){
+delete(cart[a]);
+document.getElementById('val'+a).innerHTML = '0';
+localStorage.setItem('cart',JSON.stringify(cart));
+}
+else{
+document.getElementById('val'+a).innerHTML = cart[a][0];
+localStorage.setItem('cart',JSON.stringify(cart));
+}
+});
+
+$('.target').on("click","button.plus",function(){
+a = this.id.slice(4,);
+if(cart[a] == undefined){
+var name = document.getElementById('name').innerHTML;
+var qty = 1;
+var price = document.getElementById('price').innerHTML;
+cart[a] =[qty,name,price];
+updatecart(idstr);
+localStorage.setItem('cart',JSON.stringify(cart));
+}
+else{
+cart[a][0]=cart[a][0]+1;
+document.getElementById('val'+a).innerHTML = cart[a][0];
+localStorage.setItem('cart',JSON.stringify(cart));
+}
+});
+
+{% endblock %}
